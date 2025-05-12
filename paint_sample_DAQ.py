@@ -44,7 +44,7 @@ class Paint_Sample_DAQ:
                 time.sleep(0.1)
                 v = self.adc.measure_voltage_drop()
                 print("Paint sample %d:\nR:%d\nG:%d\nB:%d\nVoltage = %f\nCurrent = %fmA\n\n" % (x, r, g, b, v, v*1000/150.0))
-                file.write("%d  %d  %d  %d\n" % (x, r, g, b))
+                file.write("%d\t%d\t%d\t%d\n" % (x, r, g, b))
                 time.sleep(5)
 
 if __name__ == "__main__":
