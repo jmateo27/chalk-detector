@@ -47,11 +47,11 @@ class Chalk_Detector:
         self.dac.begin()
         self.led.LED_on()
         print('Red:', self.rgbSensor.read_colour_raw(RED))
-            print('Green:', self.rgbSensor.read_colour_raw(GREEN))
-            print('Blue:', self.rgbSensor.read_colour_raw(BLUE))
-            self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
-            time.sleep(0.1)
-            self.adc.print_voltage_drop()
+        print('Green:', self.rgbSensor.read_colour_raw(GREEN))
+        print('Blue:', self.rgbSensor.read_colour_raw(BLUE))
+        self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
+        time.sleep(0.1)
+        self.adc.print_voltage_drop()
             
     def main(self):
         self.dac.begin()
