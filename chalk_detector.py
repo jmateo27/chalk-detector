@@ -57,6 +57,7 @@ class Chalk_Detector:
         self.dac.begin()
         self.led.LED_on()
         print("3 seconds to begin, get paint sample 01 ready...")
+        time.sleep(3)
         for x in range(1, 23):
             r = self.rgbSensor.read_colour_raw(RED)
             g = self.rgbSensor.read_colour_raw(GREEN)
@@ -64,7 +65,8 @@ class Chalk_Detector:
             self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
             time.sleep(0.1)
             v = self.adc.measure_voltage_drop()
-            print("Paint sample %d:\nR:%d\nG:%d\nB:%d\nVoltage = %d\nCurrent = %dmA\n\n" % (x, r, g, b, v, v/150.0*1000))
+            print("Paint sample %d:\nR:%d\nG:%d\nB:%d\nVoltage = %f\nCurrent = %fmA\n\n" % (x, r, g, b, v, v*1000/150.0))
+            time.sleep(5)
             
     def main(self):
         self.dac.begin()
@@ -82,4 +84,5 @@ class Chalk_Detector:
 
 if __name__ == "__main__":
     chalkDetector = Chalk_Detector()
+#     chalkDetector.main()
     chalkDetector.collectPaintSampleData()
