@@ -45,5 +45,6 @@ class Chalk_Detector:
             time.sleep(MEASUREMENT_LATENCY_SECS)
 
 if __name__ == "__main__":
+    time.sleep(5)
     chalkDetector = Chalk_Detector()
     chalkDetector.main()
