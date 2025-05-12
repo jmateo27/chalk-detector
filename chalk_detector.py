@@ -1,0 +1,62 @@
+from rgb import RGB_Sensor
+from led import LED
+from adcReader import ADC_Reader
+from dac4to20 import DAC_4to20
+
+import time
+
+# CONSTANTS
+PERIPHERAL_FREQ             = 400000
+
+RGB_SENSOR_SDA_PIN          = 16
+RGB_SENSOR_SCL_PIN          = 17
+LED_PWM_PIN                 = 21
+ADC1_PIN                    = 28
+ADC2_PIN                    = 27
+DAC_SDA_PIN                 = 14
+DAC_SCL_PIN                 = 15
+
+MEASUREMENT_LATENCY_SECS    = 2.0
+
+RED     = 1
+GREEN   = 2
+BLUE    = 3
+
+
+class Chalk_Detector:
+    def __init__(self):
+        self.rgbSensor  = RGB_Sensor(RGB_SENSOR_SCL_PIN, RGB_SENSOR_SDA_PIN, PERIPHERAL_FREQ, 0)
+        self.dac        = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
+        self.led        = LED(LED_PWM_PIN)
+        self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
+    
+    def test_dac(self):
+        self.dac.begin()
+        for x in range(4, 21):
+            self.dac.output(x)
+            print('For current = ', x, ' mA')
+            time.sleep(0.1)
+            self.adc.print_voltage_drop()
+            time.sleep(0.1)
+        
+        print("Ending...")
+        self.dac.output(0)
+        self.adc.print_voltage_drop()
+
+    def main(self):
+        self.dac.begin()
+        self.led.LED_on()
+
+        while True:
+            print('Red:', self.rgbSensor.read_colour_raw(RED))
+            print('Green:', self.rgbSensor.read_colour_raw(GREEN))
+            print('Blue:', self.rgbSensor.read_colour_raw(BLUE))
+            self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
+            time.sleep(0.1)
+            self.adc.print_voltage_drop()
+            print('')
+            time.sleep(MEASUREMENT_LATENCY_SECS)
+
+if __name__ == "__main__":
+    chalkDetector = Chalk_Detector()
+    chalkDetector.test_dac()
