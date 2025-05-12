@@ -1,7 +1,7 @@
 from rgb import RGB_Sensor
 from led import LED
 from adcReader import ADC_Reader
-from dac4to20 import GP8302
+from dac4to20 import DAC_4to20
 
 import time
 
@@ -13,8 +13,8 @@ RGB_SENSOR_SCL_PIN          = 17
 LED_PWM_PIN                 = 21
 ADC1_PIN                    = 28
 ADC2_PIN                    = 27
-DAC_SDA_PIN                 = 14
-DAC_SCL_PIN                 = 15
+DAC_SDA_PIN                 = 18
+DAC_SCL_PIN                 = 19
 
 MEASUREMENT_LATENCY_SECS    = 2.0
 
@@ -26,7 +26,7 @@ BLUE    = 3
 class Chalk_Detector:
     def __init__(self):
         self.rgbSensor  = RGB_Sensor(RGB_SENSOR_SCL_PIN, RGB_SENSOR_SDA_PIN, PERIPHERAL_FREQ, 0)
-        self.dac        = GP8302(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
+        self.dac        = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
         self.led        = LED(LED_PWM_PIN)
         self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
     
@@ -37,16 +37,26 @@ class Chalk_Detector:
             print('For current = ', x, ' mA')
             time.sleep(0.1)
             self.adc.print_voltage_drop()
-            time.sleep(0.1)
+            time.sleep(1.0)
         
         print("Ending...")
         self.dac.output(0)
         self.adc.print_voltage_drop()
-
+        
+    def read_one_output(self):
+        self.dac.begin()
+        self.led.LED_on()
+        print('Red:', self.rgbSensor.read_colour_raw(RED))
+            print('Green:', self.rgbSensor.read_colour_raw(GREEN))
+            print('Blue:', self.rgbSensor.read_colour_raw(BLUE))
+            self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
+            time.sleep(0.1)
+            self.adc.print_voltage_drop()
+            
     def main(self):
         self.dac.begin()
         self.led.LED_on()
-
+    
         while True:
             print('Red:', self.rgbSensor.read_colour_raw(RED))
             print('Green:', self.rgbSensor.read_colour_raw(GREEN))
@@ -59,4 +69,4 @@ class Chalk_Detector:
 
 if __name__ == "__main__":
     chalkDetector = Chalk_Detector()
-    chalkDetector.test_dac()
+    chalkDetector.read_one_output()
