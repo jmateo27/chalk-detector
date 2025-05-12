@@ -1,12 +1,12 @@
 from rgb import RGB_Sensor
 from led import LED
 from adcReader import ADC_Reader
-from dac4to20 import DAC_4to20
+from dac4to20 import GP8302
 
 import time
 
 # CONSTANTS
-PERIPHERAL_FREQ             = 400000
+PERIPHERAL_FREQ             = 100000
 
 RGB_SENSOR_SDA_PIN          = 16
 RGB_SENSOR_SCL_PIN          = 17
@@ -26,7 +26,7 @@ BLUE    = 3
 class Chalk_Detector:
     def __init__(self):
         self.rgbSensor  = RGB_Sensor(RGB_SENSOR_SCL_PIN, RGB_SENSOR_SDA_PIN, PERIPHERAL_FREQ, 0)
-        self.dac        = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
+        self.dac        = GP8302(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
         self.led        = LED(LED_PWM_PIN)
         self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
     
