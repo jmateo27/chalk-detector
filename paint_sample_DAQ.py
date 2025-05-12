@@ -35,7 +35,7 @@ class Paint_Sample_DAQ:
         self.led.LED_on()
         print("3 seconds to begin, get paint sample 01 ready...")
         time.sleep(3)
-        with open('output/data.txt', 'w') as file:
+        with open('data.txt', 'w') as file:
             for x in range(1, 23):
                 r = self.rgbSensor.read_colour_raw(RED)
                 g = self.rgbSensor.read_colour_raw(GREEN)
