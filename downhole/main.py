@@ -23,30 +23,27 @@ GREEN   = 2
 BLUE    = 3
 
 
-class Paint_Sample_DAQ:
+class Chalk_Detector:
     def __init__(self):
         self.rgbSensor  = RGB_Sensor(RGB_SENSOR_SCL_PIN, RGB_SENSOR_SDA_PIN, PERIPHERAL_FREQ, 0)
         self.dac        = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
         self.led        = LED(LED_PWM_PIN)
         self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
-
-    def collectPaintSampleData(self):
+    
+    def main(self):
         self.dac.begin()
         self.led.LED_on()
-        print("3 seconds to begin, get paint sample 01 ready...")
-        time.sleep(3)
-        with open('data.txt', 'w') as file:
-            for x in range(1, 23):
-                r = self.rgbSensor.read_colour_raw(RED)
-                g = self.rgbSensor.read_colour_raw(GREEN)
-                b = self.rgbSensor.read_colour_raw(BLUE)
-                self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
-                time.sleep(0.1)
-                v = self.adc.measure_voltage_drop()
-                print("Paint sample %d:\nR:%d\nG:%d\nB:%d\nVoltage = %f\nCurrent = %fmA\n\n" % (x, r, g, b, v, v*1000/150.0))
-                file.write("%d\t%d\t%d\t%d\n" % (x, r, g, b))
-                time.sleep(5)
+    
+        while True:
+            print('Red:', self.rgbSensor.read_colour_raw(RED))
+            print('Green:', self.rgbSensor.read_colour_raw(GREEN))
+            print('Blue:', self.rgbSensor.read_colour_raw(BLUE))
+            self.dac.output(self.rgbSensor.read_colour_mA(BLUE))
+            time.sleep(0.1)
+            self.adc.print_voltage_drop()
+            print('')
+            time.sleep(MEASUREMENT_LATENCY_SECS)
 
 if __name__ == "__main__":
-    paintSampleDAQ = Paint_Sample_DAQ()
-    paintSampleDAQ.collectPaintSampleData()
+    chalkDetector = Chalk_Detector()
+    chalkDetector.main()
