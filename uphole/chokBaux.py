@@ -29,7 +29,7 @@ class ChokBaux:
             for x in range(1, 23):
                 v = self.adc.measure_voltage_drop()
                 print("Paint sample %d:\nVoltage = %f\nCurrent = %fmA\n\n" % (x, v, v*1000.0/150.0))
-                file.write("%d\t%f\t%f\n" % (x, v, v*1000.0/150.0))
+                file.write("%d\t%f\t%f\t%d\n" % (x, v, v*1000.0/150.0, int(v*0xFFFF/3.3)))
                 time.sleep(5)
 
 if __name__ == "__main__":
