@@ -14,6 +14,7 @@ LOAD_RESISTOR_OHMS          = 150.0
 A_to_mA                     = 1000.0
 
 DEPTH_INCREMENT             = 0.25
+CYCLE_LATENCY_MS            = 1
 
 class ChokBaux:
     def __init__(self):
@@ -56,24 +57,26 @@ class ChokBaux:
         time.sleep(3)
         with open('data.txt', 'w') as file:
             file.write("Depth\tVoltage\tCurrent\t# Counts\n")
+            file.flush()
             while True:
+                time.sleep_ms(CYCLE_LATENCY_MS)
                 if self.dpt_rst_in.isHigh():
                     self.depth_count = 0
-                else:
-                    if self.ena_in.isHigh():
-                        if self.dpt_in.isHigh():
-                            self.depth_count += DEPTH_INCREMENT
-                            c = self.adc.measure_counts()
-                            v = self.counts_to_voltage_drop_V(c)
-                            i = self.counts_to_current_consumption_mA(c)
-                            print("Depth = %f\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
-                            file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
-                            while self.dpt_in.isHigh():
-                                continue
-                        else:
-                            continue
-                    else:
-                        continue
+                    continue
+
+                if not self.ena_in.isHigh():
+                    continue
+
+                if self.dpt_in.isHigh():
+                    self.depth_count += DEPTH_INCREMENT
+                    c = self.adc.measure_counts()
+                    v = self.counts_to_voltage_drop_V(c)
+                    i = self.counts_to_current_consumption_mA(c)
+                    print("Depth = %f\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
+                    file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
+                    file.flush()
+                    while self.dpt_in.isHigh():
+                        time.sleep_ms(CYCLE_LATENCY_MS)
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
