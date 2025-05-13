@@ -1,4 +1,6 @@
 from adcReader import ADC_Reader
+from pinInterface import Input_Pin_Interface
+from inputPins import input_pins
 
 import time
 
@@ -6,14 +8,20 @@ import time
 ADC1_PIN                    = 28
 ADC2_PIN                    = 27
 
-MEASUREMENT_LATENCY_SECS    = 2.0
+MEASUREMENT_LATENCY_SECS    = 5.0
 
 LOAD_RESISTOR_OHMS          = 150.0
 A_to_mA                     = 1000.0
 
+DEPTH_INCREMENT             = 0.25
+
 class ChokBaux:
     def __init__(self):
-        self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
+        self.adc            = ADC_Reader(ADC1_PIN, ADC2_PIN)
+        self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'])
+        self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'])
+        self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'])
+        self.depth_count    = 0
     
     def counts_to_voltage_drop_V(self, counts):
         return counts * self.adc.ADC_MAX_VOLTAGE / self.adc.ADC_MAX_READING
@@ -24,14 +32,13 @@ class ChokBaux:
     def collectData(self):
         time.sleep(3)
         while True:
-        # with open('data.txt', 'w') as file:
-            time.sleep(0.1)
-            c = self.adc.measure_counts()
-            v = self.counts_to_voltage_drop_V(c)
-            i = self.counts_to_current_consumption_mA(c)
-            print("Voltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (v, i, c))
-            # file.write("%f\t%f\t%d\n" % (v, i, c))
-            time.sleep(5)
+            with open('data.txt', 'w') as file:
+                c = self.adc.measure_counts()
+                v = self.counts_to_voltage_drop_V(c)
+                i = self.counts_to_current_consumption_mA(c)
+                print("Voltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (v, i, c))
+                file.write("%f\t%f\t%d\n" % (v, i, c))
+                time.sleep(MEASUREMENT_LATENCY_SECS)
             
     def collectPaintSampleData(self):
         print("3 seconds to begin, get paint sample 01 ready...")
@@ -41,10 +48,32 @@ class ChokBaux:
                 c = self.adc.measure_counts()
                 v = self.counts_to_voltage_drop_V(c)
                 i = self.counts_to_current_consumption_mA(c)
-
                 print("Paint sample %d:\nVoltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (x, v, i, c))
                 file.write("%d\t%f\t%f\t%d\n" % (x, v, i, c))
-                time.sleep(5)
+                time.sleep(MEASUREMENT_LATENCY_SECS)
+
+    def main_polling(self):
+        time.sleep(3)
+        with open('data.txt', 'w') as file:
+            file.write("Depth\tVoltage\tCurrent\t# Counts\n")
+            while True:
+                if self.dpt_rst_in.isHigh():
+                    self.depth_count = 0
+                else:
+                    if self.ena_in.isHigh():
+                        if self.dpt_in.isHigh():
+                            self.depth_count += DEPTH_INCREMENT
+                            c = self.adc.measure_counts()
+                            v = self.counts_to_voltage_drop_V(c)
+                            i = self.counts_to_current_consumption_mA(c)
+                            print("Depth = %f\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
+                            file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
+                            while self.dpt_in.isHigh():
+                                continue
+                        else:
+                            continue
+                    else:
+                        continue
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
