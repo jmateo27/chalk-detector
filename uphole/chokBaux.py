@@ -8,8 +8,8 @@ ADC2_PIN                    = 27
 
 MEASUREMENT_LATENCY_SECS    = 2.0
 
-LOAD_RESISTOR_OHMS  = 150.0
-A_to_mA             = 1000.0
+LOAD_RESISTOR_OHMS          = 150.0
+A_to_mA                     = 1000.0
 
 class ChokBaux:
     def __init__(self):
@@ -29,7 +29,7 @@ class ChokBaux:
             c = self.adc.measure_counts()
             v = self.counts_to_voltage_drop_V(c)
             i = self.counts_to_current_consumption_mA(c)
-            print("Voltage = %f\nCurrent = %fmA\nCounts = %d\n\n" % (v, i, c))
+            print("Voltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (v, i, c))
             # file.write("%f\t%f\t%d\n" % (v, i, c))
             time.sleep(5)
             
@@ -42,7 +42,7 @@ class ChokBaux:
                 v = self.counts_to_voltage_drop_V(c)
                 i = self.counts_to_current_consumption_mA(c)
 
-                print("Paint sample %d:\nVoltage = %f\nCurrent = %fmA\nCounts = %d\n\n" % (x, v, i, c))
+                print("Paint sample %d:\nVoltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (x, v, i, c))
                 file.write("%d\t%f\t%f\t%d\n" % (x, v, i, c))
                 time.sleep(5)
 
