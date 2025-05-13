@@ -20,8 +20,18 @@ class ChokBaux:
             v = self.adc.measure_voltage_drop()
             print("Voltage Reading = %f" % (v))
             # file.write("%d\t%d\t%d\t%d\n" % (x, r, g, b))
-            time.sleep(2)
+            time.sleep(5)
+            
+    def collectPaintSampleData(self):
+        print("3 seconds to begin, get paint sample 01 ready...")
+        time.sleep(3)
+        with open('uphole_data_45m.txt', 'w') as file:
+            for x in range(1, 23):
+                v = self.adc.measure_voltage_drop()
+                print("Paint sample %d:\nVoltage = %f\nCurrent = %fmA\n\n" % (x, v, v*1000.0/150.0))
+                file.write("%d\t%f\t%f\n" % (x, v, v*1000.0/150.0))
+                time.sleep(5)
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
-    chokBaux.collectData()
+    chokBaux.collectPaintSampleData()

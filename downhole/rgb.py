@@ -20,6 +20,8 @@ RED     = 1
 GREEN   = 2
 BLUE    = 3
 
+BLUE_MAX_READING = 400
+
 class RGB_Sensor:
     def __init__(self, scl_pin, sda_pin, freq, id):
         self.i2c = machine.I2C(id,
@@ -51,7 +53,9 @@ class RGB_Sensor:
     
     def read_colour_mA(self, colour):
         raw_reading = self.read_colour_raw(colour)
-        
-        return raw_reading / VEML3328_MAX_READING * CURRENT_RANGE_mA + CURRENT_MIN_mA
+        if colour == BLUE:
+            return raw_reading / BLUE_MAX_READING * CURRENT_RANGE_mA + CURRENT_MIN_mA
+        else:
+            return raw_reading / VEML3328_MAX_READING * CURRENT_RANGE_mA + CURRENT_MIN_mA
             
     
