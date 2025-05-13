@@ -8,18 +8,29 @@ ADC2_PIN                    = 27
 
 MEASUREMENT_LATENCY_SECS    = 2.0
 
+LOAD_RESISTOR_OHMS  = 150.0
+A_to_mA             = 1000.0
+
 class ChokBaux:
     def __init__(self):
         self.adc        = ADC_Reader(ADC1_PIN, ADC2_PIN)
+    
+    def counts_to_voltage_drop_V(self, counts):
+        return counts * self.adc.ADC_MAX_VOLTAGE / self.adc.ADC_MAX_READING
+    
+    def counts_to_current_consumption_mA(self, counts):
+        return self.counts_to_voltage_drop_V(counts) * A_to_mA / LOAD_RESISTOR_OHMS
 
     def collectData(self):
         time.sleep(3)
         while True:
         # with open('data.txt', 'w') as file:
             time.sleep(0.1)
-            v = self.adc.measure_voltage_drop()
-            print("Voltage Reading = %f" % (v))
-            # file.write("%d\t%d\t%d\t%d\n" % (x, r, g, b))
+            c = self.adc.measure_counts()
+            v = self.counts_to_voltage_drop_V(c)
+            i = self.counts_to_current_consumption_mA(c)
+            print("Voltage = %f\nCurrent = %fmA\nCounts = %d\n\n" % (v, i, c))
+            # file.write("%f\t%f\t%d\n" % (v, i, c))
             time.sleep(5)
             
     def collectPaintSampleData(self):
@@ -27,9 +38,12 @@ class ChokBaux:
         time.sleep(3)
         with open('uphole_data_45m.txt', 'w') as file:
             for x in range(1, 23):
-                v = self.adc.measure_voltage_drop()
-                print("Paint sample %d:\nVoltage = %f\nCurrent = %fmA\n\n" % (x, v, v*1000.0/150.0))
-                file.write("%d\t%f\t%f\t%d\n" % (x, v, v*1000.0/150.0, int(v*0xFFFF/3.3)))
+                c = self.adc.measure_counts()
+                v = self.counts_to_voltage_drop_V(c)
+                i = self.counts_to_current_consumption_mA(c)
+
+                print("Paint sample %d:\nVoltage = %f\nCurrent = %fmA\nCounts = %d\n\n" % (x, v, i, c))
+                file.write("%d\t%f\t%f\t%d\n" % (x, v, i, c))
                 time.sleep(5)
 
 if __name__ == "__main__":
