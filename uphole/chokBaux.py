@@ -13,9 +13,9 @@ MEASUREMENT_LATENCY_SECS    = 5.0
 LOAD_RESISTOR_OHMS          = 150.0
 A_to_mA                     = 1000.0
 
-DEPTH_INCREMENT             = 0.25
+DEPTH_INCREMENT_M             = 0.025
 CYCLE_LATENCY_MS            = 1
-DEBOUNCE_MS                 = 50
+DEBOUNCE_MS                 = 1000
 
 class ChokBaux:
     def __init__(self):
@@ -88,7 +88,7 @@ class ChokBaux:
                     continue
 
                 if self.dpt_in.isHigh():
-                    self.depth_count += DEPTH_INCREMENT
+                    self.depth_count += DEPTH_INCREMENT_M
                     c = self.adc.measure_counts()
                     v = self.counts_to_voltage_drop_V(c)
                     i = self.counts_to_current_consumption_mA(c)
@@ -102,15 +102,16 @@ class ChokBaux:
         self.depth_count = 0
         
     def depth_reset_handler(self, pin):
-        print('Depth reset switch flipped. Setting depth back to 0 m')
-        current_time = time.ticks_ms()
-        if time.ticks_diff(current_time, self.last_trigger_time) > self.debounce_ms:
-            self.last_trigger_time = current_time
-            self.timer2.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_reset_timer_callback)
+        if self.dpt_rst_in.isHigh():
+            print('Depth reset switch flipped. Setting depth back to 0 m')
+            current_time = time.ticks_ms()
+            if time.ticks_diff(current_time, self.last_trigger_time) > DEBOUNCE_MS:
+                self.last_trigger_time = current_time
+                self.timer2.init(mode=machine.Timer.ONE_SHOT, period=DEBOUNCE_MS, callback=self.depth_reset_timer_callback)
 
 
     def depth_timer_callback(self, t):
-        self.depth_count += DEPTH_INCREMENT
+        self.depth_count += DEPTH_INCREMENT_M
         c = self.adc.measure_counts()
         v = self.counts_to_voltage_drop_V(c)
         i = self.counts_to_current_consumption_mA(c)
