@@ -15,6 +15,7 @@ A_to_mA                     = 1000.0
 
 DEPTH_INCREMENT             = 0.25
 CYCLE_LATENCY_MS            = 1
+DEBOUNCE_MS                 = 50
 
 class ChokBaux:
     def __init__(self):
@@ -30,6 +31,7 @@ class ChokBaux:
         self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
         self.timer1          = machine.Timer()
         self.timer2          = machine.Timer()
+        self.last_trigger_time = 0
         
         self.depth_count    = 0
     
@@ -101,7 +103,11 @@ class ChokBaux:
         
     def depth_reset_handler(self, pin):
         print('Depth reset switch flipped. Setting depth back to 0 m')
-        self.timer2.init(mode=machine.Timer.ONE_SHOT, period=100, callback=self.depth_reset_timer_callback)
+        current_time = time.ticks_ms()
+        if time.ticks_diff(current_time, self.last_trigger_time) > self.debounce_ms:
+            self.last_trigger_time = current_time
+            self.timer2.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_reset_timer_callback)
+
 
     def depth_timer_callback(self, t):
         self.depth_count += DEPTH_INCREMENT
