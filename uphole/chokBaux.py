@@ -19,17 +19,18 @@ CYCLE_LATENCY_MS            = 1
 class ChokBaux:
     def __init__(self):
         self.adc            = ADC_Reader(ADC1_PIN, ADC2_PIN)
-        # Polling Version
-        self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'REGULAR')
-        self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'REGULAR')
+#         Polling Version
+#         self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'REGULAR')
+#         self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'REGULAR')
+#         self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
+        
+#         Interrupt Version
+        self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'INTERRUPT')
+        self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'INTERRUPT')
         self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
-        #
-        # Interrupt Version
-        # self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'INTERRUPT')
-        # self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'INTERRUPT')
-        # self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
-        # self.timer          = machine.Timer()
-        #         
+        self.timer1          = machine.Timer()
+        self.timer2          = machine.Timer()
+        
         self.depth_count    = 0
     
     def counts_to_voltage_drop_V(self, counts):
@@ -60,6 +61,15 @@ class ChokBaux:
                 print("Paint sample %d:\nVoltage = %f V\nCurrent = %f mA\n# Counts = %d\n\n" % (x, v, i, c))
                 file.write("%d\t%f\t%f\t%d\n" % (x, v, i, c))
                 time.sleep(MEASUREMENT_LATENCY_SECS)
+                
+    def test_inputs(self):
+        time.sleep(3)
+        while True:
+            if self.dpt_in.isHigh():
+                print('String pot is moving')
+            if self.ena_in.isHigh():
+                print('Enable switch is on')
+            time.sleep_ms(CYCLE_LATENCY_MS)
 
     def main_polling(self):
         time.sleep(3)
@@ -86,8 +96,12 @@ class ChokBaux:
                     while self.dpt_in.isHigh():
                         time.sleep_ms(CYCLE_LATENCY_MS)
 
-    def depth_reset_handler(self, pin):
+    def depth_reset_timer_callback(self, t):
         self.depth_count = 0
+        
+    def depth_reset_handler(self, pin):
+        print('Depth reset switch flipped. Setting depth back to 0 m')
+        self.timer2.init(mode=machine.Timer.ONE_SHOT, period=100, callback=self.depth_reset_timer_callback)
 
     def depth_timer_callback(self, t):
         self.depth_count += DEPTH_INCREMENT
@@ -101,7 +115,7 @@ class ChokBaux:
 
     def depth_input_handler(self, pin):
         if self.ena_in.isHigh():
-            self.timer.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_timer_callback)
+            self.timer1.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_timer_callback)
 
     def main_interrupt(self):
         time.sleep(3)
@@ -115,4 +129,4 @@ class ChokBaux:
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
-    chokBaux.collectPaintSampleData()
+    chokBaux.main_interrupt()
