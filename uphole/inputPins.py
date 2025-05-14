@@ -4,6 +4,11 @@ input_pins = {
     'ENA_IN':  11
 }
 
+input_types = [
+    'REGULAR',
+    'INTERRUPT'
+]
+
 def get_label_from_pin(pin_number):
     for label, number in input_pins.items():
         if number == pin_number:

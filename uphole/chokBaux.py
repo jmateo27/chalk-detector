@@ -3,7 +3,7 @@ from pinInterface import Input_Pin_Interface
 from inputPins import input_pins
 
 import time
-
+import machine
 # CONSTANTS
 ADC1_PIN                    = 28
 ADC2_PIN                    = 27
@@ -19,9 +19,17 @@ CYCLE_LATENCY_MS            = 1
 class ChokBaux:
     def __init__(self):
         self.adc            = ADC_Reader(ADC1_PIN, ADC2_PIN)
-        self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'])
-        self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'])
-        self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'])
+        # Polling Version
+        self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'REGULAR')
+        self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'REGULAR')
+        self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
+        #
+        # Interrupt Version
+        # self.dpt_rst_in     = Input_Pin_Interface(input_pins['DPT_RST'], 'INTERRUPT')
+        # self.dpt_in         = Input_Pin_Interface(input_pins['DPT_IN'], 'INTERRUPT')
+        # self.ena_in         = Input_Pin_Interface(input_pins['ENA_IN'], 'REGULAR')
+        # self.timer          = machine.Timer()
+        #         
         self.depth_count    = 0
     
     def counts_to_voltage_drop_V(self, counts):
@@ -77,6 +85,33 @@ class ChokBaux:
                     file.flush()
                     while self.dpt_in.isHigh():
                         time.sleep_ms(CYCLE_LATENCY_MS)
+
+    def depth_reset_handler(self, pin):
+        self.depth_count = 0
+
+    def depth_timer_callback(self, t):
+        self.depth_count += DEPTH_INCREMENT
+        c = self.adc.measure_counts()
+        v = self.counts_to_voltage_drop_V(c)
+        i = self.counts_to_current_consumption_mA(c)
+        print("Depth = %f\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
+        with open('data.txt', 'a') as file:
+            file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
+            file.flush()
+
+    def depth_input_handler(self, pin):
+        if self.ena_in.isHigh():
+            self.timer.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_timer_callback)
+
+    def main_interrupt(self):
+        time.sleep(3)
+        with open('data.txt', 'w') as file:
+            file.write("Depth\tVoltage\tCurrent\t# Counts\n")
+            file.flush()
+        self.dpt_rst_in.setUpInterrupt(self.depth_reset_handler)
+        self.dpt_in.setUpInterrupt(self.depth_input_handler)
+
+
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
