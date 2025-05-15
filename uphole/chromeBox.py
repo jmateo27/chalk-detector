@@ -8,12 +8,13 @@ import machine
 ADC1_PIN                    = 28
 ADC2_PIN                    = 27
 
+INIT_WAIT_SECS              = 3.0
 MEASUREMENT_LATENCY_SECS    = 5.0
 
 LOAD_RESISTOR_OHMS          = 150.0
 A_to_mA                     = 1000.0
 
-DEPTH_INCREMENT_M             = 0.025
+DEPTH_INCREMENT_M           = 0.025
 CYCLE_LATENCY_MS            = 1
 DEBOUNCE_MS                 = 200
 
@@ -36,7 +37,7 @@ class ChokBaux:
         return self.counts_to_voltage_drop_V(counts) * A_to_mA / LOAD_RESISTOR_OHMS
 
     def collectData(self):
-        time.sleep(3)
+        time.sleep(INIT_WAIT_SECS)
         while True:
             with open('data.txt', 'w') as file:
                 c = self.adc.measure_counts()
@@ -48,7 +49,7 @@ class ChokBaux:
             
     def collectPaintSampleData(self):
         print("3 seconds to begin, get paint sample 01 ready...")
-        time.sleep(3)
+        time.sleep(INIT_WAIT_SECS)
         with open('uphole_data_45m.txt', 'w') as file:
             for x in range(1, 23):
                 c = self.adc.measure_counts()
@@ -74,7 +75,7 @@ class ChokBaux:
         c = self.adc.measure_counts()
         v = self.counts_to_voltage_drop_V(c)
         i = self.counts_to_current_consumption_mA(c)
-        print("Depth = %f\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
+        print("Depth = %f m\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
         with open('data.txt', 'a') as file:
             file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
             file.flush()
@@ -84,14 +85,13 @@ class ChokBaux:
             self.timer1.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_timer_callback)
 
     def main(self):
-        time.sleep(3)
+        time.sleep(INIT_WAIT_SECS)
         with open('data.txt', 'w') as file:
-            file.write("Depth\tVoltage\tCurrent\t# Counts\n")
+            file.write("Depth(m)\tVoltage(V)\tCurrent(mA)\t# Counts\n")
             file.flush()
         self.dpt_rst_in.setUpInterrupt(self.depth_reset_handler)
         self.dpt_in.setUpInterrupt(self.depth_input_handler)
-
-
+        print("ChromeBox is in action!\n")
 
 if __name__ == "__main__":
     chokBaux = ChokBaux()
