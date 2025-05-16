@@ -1,4 +1,5 @@
 import machine
+import math
 
 ADC_MAX_VOLTAGE     = 3.3
 ADC_MAX_READING     = 0xFFFF
@@ -9,7 +10,7 @@ class ADC_Reader:
         self.adc2 = machine.ADC(adc2_pin)
     
     def measure_voltage_drop(self):
-        return (self.adc1.read_u16() - self.adc2.read_u16()) * ADC_MAX_VOLTAGE / ADC_MAX_READING
+        return math.abs(self.adc1.read_u16() - self.adc2.read_u16()) * ADC_MAX_VOLTAGE / ADC_MAX_READING
 
     def print_voltage_drop(self):
         print('Current voltage drop is ', self.measure_voltage_drop())

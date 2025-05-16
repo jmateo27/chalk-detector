@@ -75,9 +75,9 @@ class ChokBaux:
         c = self.adc.measure_counts()
         v = self.counts_to_voltage_drop_V(c)
         i = self.counts_to_current_consumption_mA(c)
-        print("Depth = %f m\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
+        print("Depth = %.3f m\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
         with open('data.txt', 'a') as file:
-            file.write("%f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
+            file.write("%.3f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
             file.flush()
 
     def depth_input_handler(self, pin):
