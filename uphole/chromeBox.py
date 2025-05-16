@@ -18,6 +18,8 @@ DEPTH_INCREMENT_M           = 0.025
 CYCLE_LATENCY_MS            = 1
 DEBOUNCE_MS                 = 200
 
+OUTPUT_FILE                 = "chromeData.csv"
+
 class ChokBaux:
     def __init__(self):
         self.adc            = ADC_Reader(ADC1_PIN, ADC2_PIN)
@@ -76,8 +78,8 @@ class ChokBaux:
         v = self.counts_to_voltage_drop_V(c)
         i = self.counts_to_current_consumption_mA(c)
         print("Depth = %.3f m\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
-        with open('data.txt', 'a') as file:
-            file.write("%.3f\t%f\t%f\t%d\n" % (self.depth_count, v, i, c))
+        with open(OUTPUT_FILE, 'a') as file:
+            file.write("%.3f,%f,%f,%d\n" % (self.depth_count, v, i, c))
             file.flush()
 
     def depth_input_handler(self, pin):
@@ -86,8 +88,8 @@ class ChokBaux:
 
     def main(self):
         time.sleep(INIT_WAIT_SECS)
-        with open('data.txt', 'w') as file:
-            file.write("Depth(m)\tVoltage(V)\tCurrent(mA)\t# Counts\n")
+        with open(OUTPUT_FILE, 'w') as file:
+            file.write("Depth(m),Voltage(V),Current(mA),# Counts\n")
             file.flush()
         self.dpt_rst_in.setUpInterrupt(self.depth_reset_handler)
         self.dpt_in.setUpInterrupt(self.depth_input_handler)
