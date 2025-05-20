@@ -18,7 +18,7 @@ DEPTH_INCREMENT_M           = 0.025
 CYCLE_LATENCY_MS            = 1
 DEBOUNCE_MS                 = 200
 
-OUTPUT_FILE                 = "chromeData.csv"
+DATA_FILE					= 'chromeData.csv'
 
 class ChokBaux:
     def __init__(self):
@@ -78,21 +78,21 @@ class ChokBaux:
         v = self.counts_to_voltage_drop_V(c)
         i = self.counts_to_current_consumption_mA(c)
         print("Depth = %.3f m\tVoltage = %f V\tCurrent = %f mA\t# Counts = %d\n\n" % (self.depth_count, v, i, c))
-        with open(OUTPUT_FILE, 'a') as file:
+        with open(DATA_FILE, 'a') as file:
             file.write("%.3f,%f,%f,%d\n" % (self.depth_count, v, i, c))
             file.flush()
 
     def depth_input_handler(self, pin):
-        if self.ena_in.isHigh():
+        if self.ena_in.isLow():
             self.timer1.init(mode=machine.Timer.ONE_SHOT, period=10, callback=self.depth_timer_callback)
 
     def main(self):
         time.sleep(INIT_WAIT_SECS)
-        with open(OUTPUT_FILE, 'w') as file:
+        with open(DATA_FILE, 'w') as file:
             file.write("Depth(m),Voltage(V),Current(mA),# Counts\n")
             file.flush()
-        self.dpt_rst_in.setUpInterrupt(self.depth_reset_handler)
-        self.dpt_in.setUpInterrupt(self.depth_input_handler)
+        self.dpt_rst_in.setUpInterrupt(self.depth_reset_handler, 'RISING')
+        self.dpt_in.setUpInterrupt(self.depth_input_handler, 'FALLING')
         print("ChromeBox is in action!\n")
 
 if __name__ == "__main__":
