@@ -67,11 +67,11 @@ class DepthPlotterApp:
         # ax.invert_yaxis()
 
         # Minor ticks every 0.05 m
-        minor_locator = ticker.MultipleLocator(0.05)
+        minor_locator = ticker.MultipleLocator(0.10)
         ax.yaxis.set_minor_locator(minor_locator)
 
         # Major ticks every 0.25 m with labels
-        major_locator = ticker.MultipleLocator(0.25)
+        major_locator = ticker.MultipleLocator(0.20)
         ax.yaxis.set_major_locator(major_locator)
 
         # Optional: smaller ticks for minor ones
