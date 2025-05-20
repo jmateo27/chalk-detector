@@ -64,7 +64,7 @@ class DepthPlotterApp:
         plt.gca().invert_yaxis()  # Make depth increase downward
 
         ax = plt.gca()
-        ax.invert_yaxis()
+        # ax.invert_yaxis()
 
         # Minor ticks every 0.05 m
         minor_locator = ticker.MultipleLocator(0.05)
