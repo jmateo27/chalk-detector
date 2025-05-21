@@ -1,5 +1,4 @@
 import machine
-import math
 
 # Constants for ADC conversion
 ADC_MAX_VOLTAGE = 3.3        # Reference voltage for ADC (typically 3.3V on RP2040)
