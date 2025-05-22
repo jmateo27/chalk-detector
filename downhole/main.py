@@ -11,7 +11,6 @@ PERIPHERAL_FREQ = 100000              # I2C frequency for peripherals (in Hz)
 # GPIO pin assignments
 RGB_SENSOR_SDA_PIN = 16              # SDA pin for RGB sensor
 RGB_SENSOR_SCL_PIN = 17              # SCL pin for RGB sensor
-LED_PWM_PIN        = 21              # PWM pin connected to LED
 DAC_SDA_PIN        = 18              # SDA pin for DAC
 DAC_SCL_PIN        = 19              # SCL pin for DAC
 
@@ -35,7 +34,6 @@ class Chalk_Detector:
         """
         self.rgbSensor = RGB_Sensor(RGB_SENSOR_SCL_PIN, RGB_SENSOR_SDA_PIN, PERIPHERAL_FREQ, 0)
         self.dac       = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
-        self.led       = LED(LED_PWM_PIN)
 
     def main(self):
         """
@@ -45,7 +43,6 @@ class Chalk_Detector:
         - Sends the corresponding value to the DAC as a current output
         """
         self.dac.begin()       # Initialize communication with DAC
-        self.led.LED_on()      # Turn on LED for lighting
 
         while True:
             # Read BLUE intensity in mA from RGB sensor and output via DAC
