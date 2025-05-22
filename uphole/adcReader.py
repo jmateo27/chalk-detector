@@ -10,14 +10,13 @@ class ADC_Reader:
         self.adc1 = machine.ADC(adc1_pin)
         self.adc2 = machine.ADC(adc2_pin)
     
-    def measure_voltage_drop(self):
+    def measure_counts(self):
         # Read raw 16-bit ADC values from both pins
         adc1_val = self.adc1.read_u16()
         adc2_val = self.adc2.read_u16()
         
         # Compute the absolute voltage difference between the two ADC readings
-        # Convert from ADC value to voltage using scaling factor
-        return abs(adc1_val - adc2_val) * ADC_MAX_VOLTAGE / ADC_MAX_READING
+        return abs(adc1_val - adc2_val)
 
     def print_voltage_drop(self):
         # Print the calculated voltage drop to the console
