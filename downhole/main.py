@@ -1,4 +1,5 @@
-from led import LED                 # Import LED control class
+from dac4to20 import DAC_4to20
+from rgb import RGB_Sensor
 
 import time
 
@@ -7,7 +8,10 @@ import time
 PERIPHERAL_FREQ = 100000              # I2C frequency for peripherals (in Hz)
 
 # GPIO pin assignments
-LED_PWM_PIN        = 21              # PWM pin connected to LED
+RGB_SDA_PIN		   = 16
+RGB_SCL_PIN		   = 17
+DAC_SDA_PIN		   = 18
+DAC_SCL_PIN		   = 19
 
 # Timing constants
 INIT_WAIT_SECS         = 2           # Delay before main logic starts (to allow peripherals to power up)
@@ -25,14 +29,14 @@ class Chalk_Detector:
         Initialize the Chalk Detector system, setting up:
         - LED for illumination or indication via PWM
         """
-        self.led       = LED(LED_PWM_PIN)
+        self.rgb	   = RGB_Sensor(RGB_SCL_PIN, RGB_SDA_PIN, PERIPHERAL_FREQ, 0)
+        self.dac	   = DAC_4to20(DAC_SCL_PIN, DAC_SDA_PIN, PERIPHERAL_FREQ, 1)
 
     def main(self):
-        """
-        Main loop of the Chalk Detector:
-        - Turns on the LED
-        """
-        self.led.LED_on()      # Turn on LED for lighting
+        while True:
+            self.dac.output(self.rgb.read_colour_mA(BLUE))
+            time.sleep_ms(MEASUREMENT_LATENCY_MS)
+        
 
 if __name__ == "__main__":
     # Wait for devices to settle before starting main logic
