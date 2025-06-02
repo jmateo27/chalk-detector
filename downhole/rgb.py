@@ -24,7 +24,7 @@ GREEN = 2
 BLUE  = 3
 
 # Custom scaling for blue channel (empirical or expected max reading)
-BLUE_MAX_READING = 2000
+BLUE_MAX_READING = 4000
 
 
 class RGB_Sensor:
